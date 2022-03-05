@@ -92,6 +92,8 @@ create user for authentication in firebase
 ---------------------------------------------
 5th Step
 
+import * as firebase from 'firebase'
+
    constructor(){
         super();
         this.state={
