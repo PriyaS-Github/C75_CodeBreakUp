@@ -23,68 +23,127 @@ In App.js
 import { createAppContainer ,createSwitchNavigator } from 'react-navigation';
 import LoginScreen from './screens/LoginScreen'
 
-const switchNavigator = createSwitchNavigator({
-LoginScreen:{screen: LoginScreen},
-TabNavigator:{screen: TabNavigator}
-})
+const AppSwitchNavigator = createSwitchNavigator(
+  {
+    Login: {
+      screen: LoginScreen
+    },
+    BottomTab: {
+      screen: BottomTabNavigator
+    }
+  },
+  {
+    initialRouteName: "Login"
+  }
+);
 
-const AppContainer =  createAppContainer(switchNavigator);
+const AppContainer = createAppContainer(AppSwitchNavigator);
+
+ render() {
+    const { fontLoaded } = this.state;
+    if (fontLoaded) {
+      return <AppContainer />;
+    }
+    return null;
+  }
 
 -----------------------------------------------------
 3rd step 
 
-<KeyboardAvoidingView style = {{alignItems:'center',marginTop:20}}>
-        <View>
-          <Image
-            source={require("../assets/booklogo.jpg")}
-            style={{width:200, height: 200}}/>
-          <Text style={{textAlign: 'center', fontSize: 30}}>Wily</Text>
-        </View>
-        <View>
-        <TextInput
-          style={styles.loginBox}
-          placeholder="abc@example.com"
-          keyboardType ='email-address'
-          onChangeText={(text)=>{
-            this.setState({
-              emailId: text
-            })
-          }}
-        />
-
-        <TextInput
-          style={styles.loginBox}
-          secureTextEntry = {true}
-          placeholder="enter Password"
-          onChangeText={(text)=>{
-            this.setState({
-              password: text
-            })
-          }}
-        />
-        </View>
-        <View>
-          <TouchableOpacity style={{height:30,width:90,borderWidth:1,marginTop:20,paddingTop:5,borderRadius:7}}
-          onPress={()=>{this.login(this.state.emailId ,this.state.password)}}>
-            <Text style={{textAlign:'center'}}>Login</Text>
-          </TouchableOpacity>
-
-        </View>
+ render() {
+    const { email, password } = this.state;
+    return (
+      <KeyboardAvoidingView behavior="padding" style={styles.container}>
+        <ImageBackground source={bgImage} style={styles.bgImage}>
+          <View style={styles.upperContainer}>
+            <Image source={appIcon} style={styles.appIcon} />
+            <Image source={appName} style={styles.appName} />
+          </View>
+          <View style={styles.lowerContainer}>
+            <TextInput
+              style={styles.textinput}
+              onChangeText={text => this.setState({ email: text })}
+              placeholder={"Enter Email"}
+              placeholderTextColor={"#FFFFFF"}
+              autoFocus
+            />
+            <TextInput
+              style={[styles.textinput, { marginTop: 20 }]}
+              onChangeText={text => this.setState({ password: text })}
+              placeholder={"Enter Password"}
+              placeholderTextColor={"#FFFFFF"}
+              secureTextEntry
+            />
+            <TouchableOpacity
+              style={[styles.button, { marginTop: 20 }]}
+              onPress={() => this.handleLogin(email, password)}
+            >
+              <Text style={styles.buttonText}>Login</Text>
+            </TouchableOpacity>
+          </View>
+        </ImageBackground>
       </KeyboardAvoidingView>
-
-
-const styles = StyleSheet.create({
-  loginBox:
-  {
-    width: 300,
-  height: 40,
-  borderWidth: 1.5,
-  fontSize: 20,
-  margin:10,
-  paddingLeft:10
+    );
   }
-})
+  
+  
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#FFFFFF"
+  },
+  bgImage: {
+    flex: 1,
+    resizeMode: "cover",
+    justifyContent: "center"
+  },
 
+  upperContainer: {
+    flex: 0.5,
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  appIcon: {
+    width: 280,
+    height: 280,
+    resizeMode: "contain",
+    marginTop: 80
+  },
+  appName: {
+    width: 130,
+    height: 130,
+    resizeMode: "contain"
+  },
+  lowerContainer: {
+    flex: 0.5,
+    alignItems: "center"
+  },
+  textinput: {
+    width: "75%",
+    height: 55,
+    padding: 10,
+    borderColor: "#FFFFFF",
+    borderWidth: 4,
+    borderRadius: 10,
+    fontSize: 18,
+    color: "#FFFFFF",
+    fontFamily: "Rajdhani_600SemiBold",
+    backgroundColor: "#5653D4"
+  },
+  button: {
+    width: "43%",
+    height: 55,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F48D20",
+    borderRadius: 15
+  },
+  buttonText: {
+    fontSize: 24,
+    color: "#FFFFFF",
+    fontFamily: "Rajdhani_600SemiBold"
+  }
+});
 ------------------------------------------
 4th step
 
@@ -92,43 +151,24 @@ create user for authentication in firebase
 ---------------------------------------------
 5th Step
 
-import * as firebase from 'firebase'
-
-   constructor(){
-        super();
-        this.state={
-          emailId : '',
-          password: ''
-        }
-      }
-
-
-       login=async(email,password)=>{
-        if (email && password){
-        //  try{
-            const response = await firebase.auth().signInWithEmailAndPassword(email,password)
-            if(response){
-              this.props.navigation.navigate('Transaction')
-            }
-         // }
-         // catch(error){
-        //     switch (error.code) {
-        //       case 'auth/user-not-found':
-        //         Alert.alert("user dosen't exists")
-        //         console.log("doesn't exist")
-        //         break
-        //       case 'auth/invalid-email':
-        //         Alert.alert('incorrect email or password')
-        //         console.log('invaild')
-        //         break
-        //     }
-        //   }
-        }
-        else{
-            Alert.alert('enter email and password');
-        }
-      }
+ constructor(props) {
+    super(props);
+    this.state = {
+      email: "",
+      password: ""
+    };
+  }
+  
+ handleLogin = (email, password) => {
+    firebase
+      .auth()
+      .signInWithEmailAndPassword(email, password)
+      .then(() => {
+        this.props.navigation.navigate("BottomTab");
+      })
+      .catch(error => {
+        Alert.alert(error.message);
+      });
+  };
 -------------------------------------------
-6th step
 
-uncomment try and catch
